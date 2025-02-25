@@ -1,14 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import * as Yup from 'yup';
 import { useFormik } from 'formik';
 
 function SignIn() {
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
     const LoginSchema = Yup.object().shape({
         email: Yup.string().email('Email is not valid').required('Email is required.'),
         password: Yup.string().required('Password is required.')
-    })
+    });
 
     const navigate = useNavigate();
 
@@ -18,23 +20,32 @@ function SignIn() {
             password: '',
         },
         onSubmit: async (values) => {
-            try{
-            const res = await axios.post("http://localhost:5000/admin/signin",values);
-
-            if(res.status==200){
-                const token=res.data.token;
-                console.log(token);
-                localStorage.setItem('token', token);
-                navigate('/landing');
-            }
-        }
-        catch(err){
-            alert("invalid credentials.");
-        }
+            setIsSubmitting(true); // Start loading
+            try {
+                const res = await axios.post("http://localhost:5000/admin/signin", values);
+            
+                if (res.status === 201) { 
+                    const token = res.data.token;
+                    localStorage.setItem("token", token);
+                    navigate("/landing");
+                } else {
+                    alert(res.data.message || "Login failed. Please try again.");
+                }
+            } catch (err) {
+                if (err.response) {
+                    alert(err.response.data.message || "Login failed. Please check your credentials.");
+                } else if (err.request) {
+                    alert("No response from server. Please try again later.");
+                } else {
+                    alert("An unexpected error occurred. Please try again.");
+                }
+                console.error("Login error:", err);
+            } finally {
+                setIsSubmitting(false); // Stop loading
+            }            
         },
         validationSchema: LoginSchema
     });
-
 
     return (
         <div className="flex flex-col items-center justify-center h-screen">
@@ -86,11 +97,12 @@ function SignIn() {
 
                 <p className="mb-4">Don't have an account?  <Link className='text-blue-500' to='/signup'>Sign Up</Link></p>
 
-
                 <button
                     type="submit"
-                    className="bg-blue-500 text-white rounded py-2 px-4">
-                    Login
+                    className={`text-white rounded py-2 px-4 w-full ${isSubmitting ? 'bg-gray-500' : 'bg-blue-500'}`}
+                    disabled={isSubmitting}
+                >
+                    {isSubmitting ? 'Logging in...' : 'Login'}
                 </button>
             </form>
         </div>

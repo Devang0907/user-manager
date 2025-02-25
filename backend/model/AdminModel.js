@@ -5,9 +5,9 @@ const Admin = sequelize.define(
     'Admin',
     {
         id: {
-            type:DataTypes.INTEGER,
-            autoIncrement:true,
-            primaryKey:true,
+            type: DataTypes.INTEGER,
+            autoIncrement: true,
+            primaryKey: true,
         },
         email: {
             type: DataTypes.STRING,
@@ -16,6 +16,16 @@ const Admin = sequelize.define(
         password: {
             type: DataTypes.STRING,
             allowNull: false
+        },
+        isVerified: {
+            type: DataTypes.BOOLEAN,
+            defaultValue: false
+        },
+        verificationToken: {
+            type: DataTypes.STRING,
+        },
+        tokenExpires: {
+            type: DataTypes.DATE
         }
     },
     {

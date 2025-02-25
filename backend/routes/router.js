@@ -1,5 +1,5 @@
 const express = require('express');
-const { signin, signup, changePassword } = require('../controller/AdminController');
+const { signin, signup, changePassword, verifyEmail } = require('../controller/AdminController');
 const { getUsers, getUserByID, addUser, updateUsers, deleteUsers } = require('../controller/UserController');
 const { verifyToken } = require('../validation/tokenValidation');
 const router = express.Router();
@@ -8,6 +8,7 @@ const router = express.Router();
 router.post('/admin/signin', signin);
 router.post('/admin/signup', signup);
 router.post('/admin/change_pass', changePassword);
+router.get('/admin/verify/:token', verifyEmail);
 
 //user routes
 router.get('/getUsers', verifyToken, getUsers)

@@ -4,14 +4,13 @@ import { useNavigate, Link } from 'react-router-dom';
 import * as Yup from 'yup';
 import { useFormik } from 'formik';
 
-
-
 function SignUp() {
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const SignUpSchema = Yup.object().shape({
         email: Yup.string().email('Email is not valid').required('Email is required.'),
-        password: Yup.string().required('Password is required.').min(3,"Minimum 3 character needed.")
-    })
+        password: Yup.string().required('Password is required.').min(3, "Minimum 3 characters needed.")
+    });
 
     const navigate = useNavigate();
 
@@ -21,16 +20,25 @@ function SignUp() {
             password: '',
         },
         onSubmit: async (values) => {
+            setIsSubmitting(true); // Start loading
             try {
-                const res = await axios.post("http://localhost:5000/admin/signup", values)
-                    
-                if (res.status == 201) {
-                    alert("You are register as admin.")
-                    navigate('/')
+                const res = await axios.post("http://localhost:5000/admin/signup", values);
+
+                if (res.status === 201) {
+                    alert("You have registered successfully! Please check your email to verify your account.");
+                    navigate('/');
                 }
-            }
-            catch (err) {
-                alert("Admin already exist")
+            } catch (err) {
+                if (err.response) {
+                    alert(err.response.data.message || "Registration failed. Please try again.");
+                } else if (err.request) {
+                    alert("No response from server. Please check your internet connection and try again.");
+                } else {
+                    alert("An unexpected error occurred. Please try again later.");
+                }
+                console.error("Signup error:", err);
+            } finally {
+                setIsSubmitting(false); // Stop loading
             }
         },
         validationSchema: SignUpSchema
@@ -74,13 +82,17 @@ function SignUp() {
                         </div>
                     )}
                 </div>
-                <button type="submit" className="bg-blue-500 text-white rounded py-2 px-4">
-                    Sign Up
+                <button
+                    type="submit"
+                    className={`text-white rounded py-2 px-4 w-full ${isSubmitting ? 'bg-gray-500' : 'bg-blue-500'}`}
+                    disabled={isSubmitting}
+                >
+                    {isSubmitting ? 'Signing up...' : 'Sign Up'}
                 </button>
             </form>
-            <p className="mb-4">Already have an account?  <Link className='text-blue-500' to='/'>Sign In</Link></p>
+            <p className="mb-4">Already have an account? <Link className='text-blue-500' to='/'>Sign In</Link></p>
         </div>
     );
-};
+}
 
 export default SignUp;
