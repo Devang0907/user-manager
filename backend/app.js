@@ -1,0 +1,29 @@
+const express = require('express');
+const { DBConnection, sequelize } = require('./config/DBConnection');
+const cors=require('cors');
+const { User } = require('./model/UserModel');
+const { Admin } = require('./model/AdminModel');
+const { verifyToken } = require('./validation/tokenValidation');
+const { router } = require('./routes/router');
+const cookieParser = require("cookie-parser");
+
+
+const app = express();
+
+app.use(cors({
+    origin: "http://localhost:5173",  
+    credentials: true,                 
+}));
+app.use(express.json());
+app.use(cookieParser());
+app.use('/', router);
+
+//sync model with database
+User.sync({force:false});
+Admin.sync({force:false});
+
+//start server
+app.listen(5000, async () => {
+    console.log("server is started at port 5000");
+    await DBConnection()
+})
