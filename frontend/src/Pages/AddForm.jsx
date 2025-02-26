@@ -1,22 +1,30 @@
-import React from 'react';
+import React,{useEffect} from 'react';
 import { useNavigate } from 'react-router-dom'
 import cryptoRandomString from 'crypto-random-string';
 import { useDispatch } from 'react-redux';
 import { addUsers } from '../redux/slices/userSlice';
 import * as Yup from 'yup';
 import { useFormik } from 'formik';
+import { useTranslation } from "react-i18next";
 
 function AddForm() {
   const phoneRegExp = /^[0-9]{10}$/g;
   const random_id = cryptoRandomString({ length: 4 });
+  const { t, i18n } = useTranslation();
+
+  //set language
+  useEffect(() => {
+    const savedLanguage = localStorage.getItem("language") || "en";
+    i18n.changeLanguage(savedLanguage); // Set language from localStorage
+  }, []);
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const schema = Yup.object().shape({
-    name: Yup.string('only in alphabets').required('Required.'),
-    email: Yup.string().email('Email is not valid').required('Required.'),
-    phoneNo: Yup.string().matches(phoneRegExp, 'Phone number is not valid').required('Required'),
+    name: Yup.string('only in alphabets').required(t("REQUIRED")),
+    email: Yup.string().email(t("EMAIL_INVALID")).required(t("REQUIRED")),
+    phoneNo: Yup.string().matches(phoneRegExp, t("PHONE_INVALID")).required(t("REQUIRED")),
   })
 
   const formik = useFormik({
@@ -50,7 +58,7 @@ function AddForm() {
             className="block text-gray-700 text-sm font-bold mb-2"
             htmlFor="name"
           >
-            Name
+             {t("NAME")}
           </label>
           <input
             className="rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
@@ -73,7 +81,7 @@ function AddForm() {
             className="block text-gray-700 text-sm font-bold mb-2"
             htmlFor="email"
           >
-            Email
+             {t("EMAIL")}
           </label>
           <input
             className="shadow appearance-none border w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
@@ -96,7 +104,7 @@ function AddForm() {
             className="block text-gray-700 text-sm font-bold mb-2"
             htmlFor="phoneNo"
           >
-            Phone Number
+            {t("PHONE")}
           </label>
           <input
             className="shadow appearance-none border w-full py-2 px-3 text-gray-700  leading-tight focus:outline-none focus:shadow-outline"

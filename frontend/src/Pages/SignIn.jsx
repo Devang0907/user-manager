@@ -1,16 +1,30 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import axios from 'axios';
 import * as Yup from 'yup';
 import { useFormik } from 'formik';
+import { useTranslation } from "react-i18next";
+import api from '../api';
 
 function SignIn() {
+    const { t, i18n } = useTranslation();
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const LoginSchema = Yup.object().shape({
-        email: Yup.string().email('Email is not valid').required('Email is required.'),
-        password: Yup.string().required('Password is required.')
+        email: Yup.string().email(t("EMAIL_INVALID")).required(t("REQUIRED")),
+        password: Yup.string().required(t("REQUIRED"))
     });
+
+    useEffect(() => {
+        const savedLanguage = localStorage.getItem("language") || "en";
+        i18n.changeLanguage(savedLanguage); // Set language from localStorage
+    }, []);
+
+    const handleLanguageChange = (e) => {
+        const selectedLang = e.target.value;
+        i18n.changeLanguage(selectedLang);
+        localStorage.setItem("language", selectedLang);
+    };
+
 
     const navigate = useNavigate();
 
@@ -22,9 +36,9 @@ function SignIn() {
         onSubmit: async (values) => {
             setIsSubmitting(true); // Start loading
             try {
-                const res = await axios.post("http://localhost:5000/admin/signin", values);
-            
-                if (res.status === 201) { 
+                const res = await api.post("/admin/signin", values);
+
+                if (res.status === 201) {
                     const token = res.data.token;
                     localStorage.setItem("token", token);
                     navigate("/landing");
@@ -42,20 +56,27 @@ function SignIn() {
                 console.error("Login error:", err);
             } finally {
                 setIsSubmitting(false); // Stop loading
-            }            
+            }
         },
         validationSchema: LoginSchema
     });
 
     return (
         <div className="flex flex-col items-center justify-center h-screen">
-            <h2 className="text-2xl font-bold mb-4">Login</h2>
+            <h2 className="text-2xl font-bold mb-4">{t("LOGIN")}</h2>
+
+            <select onChange={handleLanguageChange} value={i18n.language}>
+                <option value="en">English</option>
+                <option value="hi">हिन्दी</option>
+                <option value="gu">ગુજરાતી</option>
+            </select>
+
             <form onSubmit={formik.handleSubmit} className="w-1/3">
                 <div className="mb-4">
                     <label
                         htmlFor="email"
                         className="block text-sm font-medium mb-2">
-                        Email
+                        {t("EMAIL")}
                     </label>
                     <input
                         type="email"
@@ -77,7 +98,7 @@ function SignIn() {
                     <label
                         htmlFor="password"
                         className="block text-sm font-medium mb-2">
-                        Password
+                        {t("PASSWORD")}
                     </label>
                     <input
                         type="password"
@@ -95,14 +116,14 @@ function SignIn() {
                     )}
                 </div>
 
-                <p className="mb-4">Don't have an account?  <Link className='text-blue-500' to='/signup'>Sign Up</Link></p>
+                <p className="mb-4">{t("NO_ACCOUNT")}  <Link className='text-blue-500' to='/signup'>{t("SIGN_UP")} </Link></p>
 
                 <button
                     type="submit"
                     className={`text-white rounded py-2 px-4 w-full ${isSubmitting ? 'bg-gray-500' : 'bg-blue-500'}`}
                     disabled={isSubmitting}
                 >
-                    {isSubmitting ? 'Logging in...' : 'Login'}
+                    {isSubmitting ? t("LOADING") : t("LOGIN")}
                 </button>
             </form>
         </div>

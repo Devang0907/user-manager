@@ -4,11 +4,19 @@ import { useDispatch } from 'react-redux';
 import { updateUsers } from '../redux/slices/userSlice';
 import * as Yup from 'yup';
 import { useFormik } from 'formik';
-import axios from 'axios';
+import api from '../api';
+import { useTranslation } from "react-i18next";
 
 function UpdateForm() {
     const { id } = useParams();
-    const [initUser,setInitUser]=useState({});
+    const [initUser, setInitUser] = useState({});
+    const { t, i18n } = useTranslation();
+
+    //set language
+    useEffect(() => {
+        const savedLanguage = localStorage.getItem("language") || "en";
+        i18n.changeLanguage(savedLanguage); // Set language from localStorage
+    }, []);
 
     const phoneRegExp = /^[0-9]{10}$/g;
 
@@ -17,25 +25,25 @@ function UpdateForm() {
 
     useEffect(() => {
         (async () => {
-          try {
-            const res = await axios.get(`http://localhost:5000/getUserByID/${id}`);
-            const userdata = res.data;
-      
-            setInitUser({
-              initname: userdata.name || "",
-              initemail: userdata.email || "",
-              initphoneNo: userdata.phoneNo || "",
-            });
-          } catch (error) {
-            console.error("Error fetching user data:", error);
-          }
+            try {
+                const res = await api.get(`/getUserByID/${id}`);
+                const userdata = res.data;
+
+                setInitUser({
+                    initname: userdata.name || "",
+                    initemail: userdata.email || "",
+                    initphoneNo: userdata.phoneNo || "",
+                });
+            } catch (error) {
+                console.error("Error fetching user data:", error);
+            }
         })();
-      }, []);
+    }, []);
 
     const schema = Yup.object().shape({
-        name: Yup.string('only in alphabets').required('Required.'),
-        email: Yup.string().email('Email is not valid').required('Required.'),
-        phoneNo: Yup.string().matches(phoneRegExp, 'Phone number is not valid').required('Required'),
+        name: Yup.string('only in alphabets').required(t("REQUIRED")),
+        email: Yup.string().email(t("EMAIL_INVALID")).required(t("REQUIRED")),
+        phoneNo: Yup.string().matches(phoneRegExp,t("PHONE_INVALID")).required(t("REQUIRED")),
     })
 
     console.log(initUser);
@@ -70,7 +78,7 @@ function UpdateForm() {
                         className="block text-gray-700 text-sm font-bold mb-2"
                         htmlFor="name"
                     >
-                        Name
+                        {t("NAME")}
                     </label>
                     <input
                         className="rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
@@ -93,7 +101,7 @@ function UpdateForm() {
                         className="block text-gray-700 text-sm font-bold mb-2"
                         htmlFor="email"
                     >
-                        Email
+                       {t("EMAIL")}
                     </label>
                     <input
                         className="shadow appearance-none border w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
@@ -116,7 +124,7 @@ function UpdateForm() {
                         className="block text-gray-700 text-sm font-bold mb-2"
                         htmlFor="phoneNo"
                     >
-                        Phone Number
+                       {t("PHONE")}
                     </label>
                     <input
                         className="shadow appearance-none border w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"

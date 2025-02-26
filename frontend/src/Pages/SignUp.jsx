@@ -1,16 +1,24 @@
-import React, { useState } from 'react';
-import axios from 'axios';
+import React, { useState , useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import * as Yup from 'yup';
 import { useFormik } from 'formik';
+import { useTranslation } from "react-i18next";
+import api from '../api';
 
 function SignUp() {
+    const { t, i18n } = useTranslation();
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const SignUpSchema = Yup.object().shape({
-        email: Yup.string().email('Email is not valid').required('Email is required.'),
-        password: Yup.string().required('Password is required.').min(3, "Minimum 3 characters needed.")
+        email: Yup.string().email(t("EMAIL_INVALID")).required(t("REQUIRED")),
+        password: Yup.string().required(t("REQUIRED")).min(3, "Minimum 3 characters needed.")
     });
+
+    //set language
+    useEffect(() => {
+            const savedLanguage = localStorage.getItem("language") || "en";
+            i18n.changeLanguage(savedLanguage); // Set language from localStorage
+        }, []);
 
     const navigate = useNavigate();
 
@@ -22,19 +30,19 @@ function SignUp() {
         onSubmit: async (values) => {
             setIsSubmitting(true); // Start loading
             try {
-                const res = await axios.post("http://localhost:5000/admin/signup", values);
+                const res = await api.post("/admin/signup", values);
 
                 if (res.status === 201) {
-                    alert("You have registered successfully! Please check your email to verify your account.");
+                    alert(t("VERIFICATION_EMAIL_SENT"));
                     navigate('/');
                 }
             } catch (err) {
                 if (err.response) {
                     alert(err.response.data.message || "Registration failed. Please try again.");
                 } else if (err.request) {
-                    alert("No response from server. Please check your internet connection and try again.");
+                    alert(t("SERVER_NO_RESPONSE"));
                 } else {
-                    alert("An unexpected error occurred. Please try again later.");
+                    alert(t("UNEXPECTED_ERROR"));
                 }
                 console.error("Signup error:", err);
             } finally {
@@ -46,10 +54,10 @@ function SignUp() {
 
     return (
         <div className="flex flex-col items-center justify-center h-screen">
-            <h2 className="text-2xl font-bold mb-4">Sign Up</h2>
+            <h2 className="text-2xl font-bold mb-4">{t("SIGN_UP")}</h2>
             <form onSubmit={formik.handleSubmit} className="w-1/3 mb-10">
                 <div className="mb-4">
-                    <label className="block text-sm font-medium mb-2" htmlFor="email">Email</label>
+                    <label className="block text-sm font-medium mb-2" htmlFor="email">{t("EMAIL")}</label>
                     <input
                         type="email"
                         id="email"
@@ -66,7 +74,7 @@ function SignUp() {
                     )}
                 </div>
                 <div className="mb-4">
-                    <label className="block text-sm font-medium mb-2" htmlFor="password">Password</label>
+                    <label className="block text-sm font-medium mb-2" htmlFor="password">{t("PASSWORD")}</label>
                     <input
                         type="password"
                         id="password"
@@ -87,10 +95,10 @@ function SignUp() {
                     className={`text-white rounded py-2 px-4 w-full ${isSubmitting ? 'bg-gray-500' : 'bg-blue-500'}`}
                     disabled={isSubmitting}
                 >
-                    {isSubmitting ? 'Signing up...' : 'Sign Up'}
+                    {isSubmitting ? t("LOADING") : t("SIGN_UP")}
                 </button>
             </form>
-            <p className="mb-4">Already have an account? <Link className='text-blue-500' to='/'>Sign In</Link></p>
+            <p className="mb-4"> {t("ACCOUNT")} <Link className='text-blue-500' to='/'>{t("SIGN_IN")}</Link></p>
         </div>
     );
 }

@@ -6,7 +6,8 @@ const { User } = require('./model/UserModel');
 const { Admin } = require('./model/AdminModel');
 const { router } = require('./routes/router');
 const cookieParser = require("cookie-parser");
-
+const i18next = require("./utils/i18n");
+const middleware = require("i18next-http-middleware");
 
 const app = express();
 
@@ -15,6 +16,7 @@ app.use(cors({
     credentials: true,                 
 }));
 app.use(express.json());
+app.use(middleware.handle(i18next)); 
 app.use(cookieParser());
 app.use('/', router);
 

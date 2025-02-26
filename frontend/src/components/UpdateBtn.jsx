@@ -1,19 +1,26 @@
-import React from 'react'
-import {useNavigate } from 'react-router-dom'
+import React, { useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useTranslation } from "react-i18next";
 
+function UpdateBtn({ id }) {
 
-function UpdateBtn({id}) {
+    const navigate = useNavigate();
+    const { t, i18n } = useTranslation();
 
-    const navigate=useNavigate();
+    //set language
+    useEffect(() => {
+        const savedLanguage = localStorage.getItem("language") || "en";
+        i18n.changeLanguage(savedLanguage); // Set language from localStorage
+    }, []);
 
     return (
         <button
             className="bg-blue-400 text-white py-1 px-4 rounded hover:bg-blue-500 transition-all"
-            onClick={()=>{
+            onClick={() => {
                 navigate(`/update/${id}`)
             }}
         >
-            Update
+             {t("UPDATE")}
         </button>
     )
 }

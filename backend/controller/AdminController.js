@@ -3,6 +3,7 @@ const { Admin } = require("../model/AdminModel");
 const jwt = require('jsonwebtoken');
 const sendEmail = require('../utils/sendEmail');
 const { scheduleWelcomeEmail } = require('../utils/scheduleEmail');
+const i18next = require("../utils/i18n");
 
 // const {z}= require('zod');
 // const {update_schema, add_schema}=require('../validation/validation')
@@ -10,18 +11,19 @@ const { scheduleWelcomeEmail } = require('../utils/scheduleEmail');
 const signin = async (req, res) => {
     try {
         const { email, password } = req.body;
+        const lang = req.headers["accept-language"] || "en";
 
         const validAdmin = await Admin.findOne({
             where: { email, password }
         });
 
-        if (!validAdmin) return res.status(401).json({ message: "Invalid credentials." });
+        if (!validAdmin) return res.status(401).json({ message: i18next.t("INVALID_CREDENTIALS", { lng: lang }) });
 
-        if (!validAdmin.isVerified) return res.status(401).json({ message: "Please verify your email first" });
+        if (!validAdmin.isVerified) return res.status(401).json({ message: i18next.t("VERIFY_EMAIL_FIRST", { lng: lang }) });
 
         const token = jwt.sign({ email: email }, process.env.JWT_PASS, { expiresIn: "1h" });
 
-        return res.status(201).json({ message: "Login successful", token });
+        return res.status(201).json({ message: i18next.t("LOGIN_SUCCESSFUL", { lng: lang }), token });
 
     } catch (error) {
         return res.status(500).json({ error: error.message });
@@ -30,25 +32,26 @@ const signin = async (req, res) => {
 
 const signup = async (req, res) => {
     try {
+        const lang = req.headers["accept-language"] || "en";
         const { email, password } = req.body;
-    
+
         const adminExists = await Admin.findOne({ where: { email } });
-    
+
         if (adminExists) {
-            return res.status(400).json({ message: "Admin already exists" });
+            return res.status(400).json({ message: i18next.t("ADMIN_EXISTS", { lng: lang }) });
         }
-    
+
         const verificationToken = jwt.sign({ email }, process.env.JWT_PASS, { expiresIn: "1h" });
-    
+
         await Admin.create({
             email,
             password,
             verificationToken,
             tokenExpires: Date.now() + 3600000
         });
-    
+
         const verificationLink = `${process.env.FRONTEND_URL}/verify/${verificationToken}`;
-    
+
         await sendEmail(
             email,
             "Verify Your Email",
@@ -73,13 +76,13 @@ const signup = async (req, res) => {
 
         // Schedule Welcome Email after 24 hours (for testing every minute)
         scheduleWelcomeEmail(email);
-    
-        return res.status(201).json({ message: "Verification email sent. Check your inbox." });
-    
+
+        return res.status(201).json({ message: i18next.t("VERIFICATION_EMAIL_SENT", { lng: lang }) });
+
     } catch (error) {
         console.error("Signup error:", error);
-        return res.status(500).json({ message: "Internal Server Error. Please try again later." });
-    }    
+        return res.status(500).json({ message: i18next.t("INTERNAL_SERVER_ERROR", { lng: lang }) });
+    }
 };
 
 const verifyEmail = async (req, res) => {
@@ -91,7 +94,7 @@ const verifyEmail = async (req, res) => {
         const admin = await Admin.findOne({ where: { email: decoded.email, verificationToken: token } });
 
         if (!admin || admin.tokenExpires < Date.now()) {
-            return res.status(400).json({ message: "Invalid or expired token" });
+            return res.status(400).json({ message: i18next.t("INVALID_OR_EXPIRED_TOKEN", { lng: lang }) });
         }
 
         // Mark admin as verified
@@ -100,7 +103,7 @@ const verifyEmail = async (req, res) => {
         admin.tokenExpires = null;
         await admin.save();
 
-        res.json({ message: "Email verified successfully. You can now log in." });
+        res.json({ message: i18next.t("EMAIL_VERIFIED", { lng: lang }) });
 
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -113,16 +116,16 @@ const changePassword = async (req, res) => {
 
         const admin = await Admin.findOne({ where: { email: email } });
         if (!admin) {
-            return res.status(400).json({ error: "Admin not found" });
+            return res.status(400).json({ message: i18next.t("ADMIN_NOT_FOUND", { lng: lang }) });
         }
 
         if (!(oldPassword === admin.password)) {
-            return res.status(400).json({ error: "Incorrect old password" });
+            return res.status(400).json({ message: i18next.t("INCORRECT_OLD_PASSWORD", { lng: lang }) });
         }
 
         admin.password = newPassword;
         await admin.save();
-        res.json({ message: "Password changed successfully" });
+        res.json({ message: i18next.t("PASSWORD_CHANGED", { lng: lang }) });
 
     } catch (error) {
         return res.status(500).json({ error: error.message });
