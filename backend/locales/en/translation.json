@@ -29,5 +29,6 @@
   "SERVER_NO_RESPONSE": "No response from server. Please try again later.",
   "UNEXPECTED_ERROR": "An unexpected error occurred. Please try again.",
   "NO_ACCOUNT": "Don't have an account?",
-  "ACCOUNT": "Already have an account?"
+  "ACCOUNT": "Already have an account?",
+  "PASSWORD_ALREADY_USED": "You cannot reuse the last 3 passwords"
 }

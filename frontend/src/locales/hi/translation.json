@@ -34,5 +34,13 @@
     "NAME": "नाम",
     "PHONE": "फोन नंबर",
     "ACTION": "कार्रवाई",
-    "SUBMIT":"सबमिट करें"
+    "SUBMIT":"सबमिट करें",
+    "CHANGE_PASSWORD": "पासवर्ड बदलें",
+    "OLD_PASSWORD": "पुराना पासवर्ड",
+    "NEW_PASSWORD": "नया पासवर्ड",
+    "CONFIRM_PASSWORD": "पासवर्ड की पुष्टि करें",
+    "CHANGING_PASSWORD": "पासवर्ड बदल रहा है...",
+    "PASSWORD_MIN": "पासवर्ड कम से कम 3 अक्षर का होना चाहिए।",
+    "PASSWORD_MISMATCH": "पासवर्ड मेल नहीं खा रहा है।",
+    "ERROR_OCCURED": "एक त्रुटि हुई। कृपया पुन: प्रयास करें।"
 }

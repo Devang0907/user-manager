@@ -86,6 +86,7 @@ const signup = async (req, res) => {
 };
 
 const verifyEmail = async (req, res) => {
+    const lang = req.headers["accept-language"] || "en";
     try {
         const { token } = req.params;
 
@@ -103,7 +104,7 @@ const verifyEmail = async (req, res) => {
         admin.tokenExpires = null;
         await admin.save();
 
-        res.json({ message: i18next.t("EMAIL_VERIFIED", { lng: lang }) });
+        return res.status(200).json({ message: i18next.t("EMAIL_VERIFIED", { lng: lang }) });
 
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -112,20 +113,38 @@ const verifyEmail = async (req, res) => {
 
 const changePassword = async (req, res) => {
     try {
+        const lang = req.headers["accept-language"] || "en";
         const { email, oldPassword, newPassword } = req.body;
 
-        const admin = await Admin.findOne({ where: { email: email } });
+        // Find admin by email
+        const admin = await Admin.findOne({ where: { email } });
+
         if (!admin) {
             return res.status(400).json({ message: i18next.t("ADMIN_NOT_FOUND", { lng: lang }) });
         }
 
+        // Verify old password
         if (!(oldPassword === admin.password)) {
             return res.status(400).json({ message: i18next.t("INCORRECT_OLD_PASSWORD", { lng: lang }) });
         }
 
+        // Check if new password exists in the last 3 passwords
+        const passwordHistory = admin.password_history || [];
+        for (const oldPass of passwordHistory) {
+            if (newPassword ===  oldPass) {
+                return res.status(400).json({ message: i18next.t("PASSWORD_ALREADY_USED", { lng: lang }) });
+            }
+        }
+
+        // Update password and maintain only last 3 passwords in history
+        const updatedHistory = [admin.password, ...passwordHistory].slice(0, 3);
+
         admin.password = newPassword;
+        admin.password_history = updatedHistory;
+
         await admin.save();
-        res.json({ message: i18next.t("PASSWORD_CHANGED", { lng: lang }) });
+
+        return res.json({ message: i18next.t("PASSWORD_CHANGED", { lng: lang }) });
 
     } catch (error) {
         return res.status(500).json({ error: error.message });

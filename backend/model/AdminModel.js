@@ -17,6 +17,11 @@ const Admin = sequelize.define(
             type: DataTypes.STRING,
             allowNull: false
         },
+        password_history: {
+            type: DataTypes.JSON, // Store previous passwords as an array
+            allowNull: true,
+            defaultValue: []
+        },
         isVerified: {
             type: DataTypes.BOOLEAN,
             defaultValue: false

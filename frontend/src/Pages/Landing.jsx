@@ -10,6 +10,7 @@ function Landing() {
   const dispatch = useDispatch();
   const { users, status, error } = useSelector((state) => state.users);
   const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
 
  //set language
   useEffect(() => {
@@ -21,7 +22,12 @@ function Landing() {
     dispatch(fetchUsers());
   }, [dispatch]);
 
-  const navigate = useNavigate();
+ 
+  const handleLanguageChange = (e) => {
+    const selectedLang = e.target.value;
+    i18n.changeLanguage(selectedLang);
+    localStorage.setItem("language", selectedLang);
+};
 
   const createUser = () => {
     navigate('/add');
@@ -32,12 +38,25 @@ function Landing() {
     navigate('/');
   }
 
+  const changePass = () => {
+    navigate('/changePassword')
+  }
 
   return (
     <div>
       {/* Navigation Bar */}
       <nav className="flex justify-between items-center bg-slate-200 p-4 shadow-md">
+        <div className='flex'>
         <span className="text-slate-900 text-3xl font-bold ml-4">{t("USER_LIST")}</span>
+        <div className='ml-5 flex items-center'>
+        <select onChange={handleLanguageChange} value={i18n.language}>
+                <option value="en">English</option>
+                <option value="hi">हिन्दी</option>
+                <option value="gu">ગુજરાતી</option>
+            </select>
+        </div>
+        </div>
+       
 
         <div>
           <button
@@ -45,6 +64,12 @@ function Landing() {
             onClick={createUser}
           >
            {t("ADD_USER")}
+          </button>
+          <button
+            className="bg-cyan-600 text-white font-medium px-6 mr-5 py-2 rounded-lg hover:bg-cyan-700 transition-all"
+            onClick={changePass}
+          >
+            {t("CHANGE_PASSWORD")}  
           </button>
           <button
             className="bg-red-500 text-white font-medium px-6 py-2 rounded-lg hover:bg-red-600 transition-all"

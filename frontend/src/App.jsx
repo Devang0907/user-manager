@@ -8,6 +8,7 @@ import SignIn from './Pages/SignIn';
 import Signup from './Pages/SignUp';
 import VerifyEmailPage from './Pages/VerifyEmailPage';
 import { jwtDecode } from "jwt-decode";
+import ChangePassPage from './Pages/ChangePassPage';
 
 
 function App() {
@@ -42,6 +43,7 @@ function App() {
         <Route path="/landing" element={<PrivateRoute><Landing /></PrivateRoute>} />
         <Route path="/add" element={<PrivateRoute><AddForm /></PrivateRoute>} />
         <Route path="/update/:id" element={<PrivateRoute><UpdateForm /></PrivateRoute>} />
+        <Route path="/changePassword" element={<PrivateRoute><ChangePassPage /></PrivateRoute>} />
         <Route path="/verify/:token" element={<VerifyEmailPage />} />
         <Route path="*" element={<NoPage />} />
       </Routes>
