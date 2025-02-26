@@ -1,9 +1,9 @@
+require('dotenv').config()
 const express = require('express');
 const { DBConnection, sequelize } = require('./config/DBConnection');
 const cors=require('cors');
 const { User } = require('./model/UserModel');
 const { Admin } = require('./model/AdminModel');
-const { verifyToken } = require('./validation/tokenValidation');
 const { router } = require('./routes/router');
 const cookieParser = require("cookie-parser");
 
@@ -11,7 +11,7 @@ const cookieParser = require("cookie-parser");
 const app = express();
 
 app.use(cors({
-    origin: "http://localhost:5173",  
+    origin: process.env.FRONTEND_URL,  
     credentials: true,                 
 }));
 app.use(express.json());

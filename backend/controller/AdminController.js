@@ -2,6 +2,7 @@ require('dotenv').config()
 const { Admin } = require("../model/AdminModel");
 const jwt = require('jsonwebtoken');
 const sendEmail = require('../utils/sendEmail');
+const { scheduleWelcomeEmail } = require('../utils/scheduleEmail');
 
 // const {z}= require('zod');
 // const {update_schema, add_schema}=require('../validation/validation')
@@ -69,6 +70,9 @@ const signup = async (req, res) => {
                 </div>
             </div>`
         );
+
+        // Schedule Welcome Email after 24 hours (for testing every minute)
+        scheduleWelcomeEmail(email);
     
         return res.status(201).json({ message: "Verification email sent. Check your inbox." });
     
